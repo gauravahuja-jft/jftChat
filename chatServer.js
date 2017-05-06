@@ -1,8 +1,8 @@
 var conf = { 
     port: 8888,
     debug: false,
-    dbPort: 6379,
-    dbHost: '127.0.0.1',
+    dbPort: 9469,
+    dbHost: 'greeneye.redistogo.com',
     dbOptions: {},
     mainroom: 'MainRoom'
 };
@@ -26,13 +26,14 @@ app.configure(function() {
 });
 
 var io = require('socket.io')(server);
-var redis = require('socket.io-redis');
+var adapter = require('socket.io-redis');
 
-io.adapter(redis({ host: conf.dbHost, port: conf.dbPort }));
+io.adapter(adapter({ host: conf.dbHost, port: conf.dbPort }));
 
 var db = require('redis').createClient();
 
 if (process.env.REDISTOGO_URL) {
+    console.log("RedisTOGO Active");
     var rtg = require("url").parse(process.env.REDISTOGO_URL);
     var db = require('redis').createClient(rtg.port, rtg.hostname);
     db.auth(rtg.auth.split(":")[1]);
@@ -94,9 +95,9 @@ io.sockets.on('connection', function(socket) {
     logger.emit('newEvent', 'userConnected', {'socket':socket.id});
 
     // Store user data in db
-    db.hset([socket.id, 'connectionDate', new Date()], redis.print);
-    db.hset([socket.id, 'socketID', socket.id], redis.print);
-    db.hset([socket.id, 'username', 'anonymous'], redis.print);
+    db.hset([socket.id, 'connectionDate', new Date()], adapter.print);
+    db.hset([socket.id, 'socketID', socket.id], adapter.print);
+    db.hset([socket.id, 'username', 'anonymous'], adapter.print);
 
     // Join user to 'MainRoom'
     socket.join(conf.mainroom);
@@ -190,7 +191,7 @@ io.sockets.on('connection', function(socket) {
         db.hget([socket.id, 'username'], function(err, username) {
 
             // Store user data in db
-            db.hset([socket.id, 'username', data.username], redis.print);
+            db.hset([socket.id, 'username', data.username], adapter.print);
             logger.emit('newEvent', 'userSetsNickname', {'socket':socket.id, 'oldUsername':username, 'newUsername':data.username});
 
             // Notify all users who belong to the same rooms that this one
@@ -238,7 +239,7 @@ io.sockets.on('connection', function(socket) {
         });
     
         // Delete user from db
-        db.del(socket.id, redis.print);
+        db.del(socket.id, adapter.print);
     });
 });
 
