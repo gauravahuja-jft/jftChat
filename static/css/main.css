@@ -1,0 +1,33 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+input.error {
+  border-color: #a94442;
+}
+
+#nav_username {
+  margin-right: 25px;
+  font-size: 18px;
+  color: #fff !important;
+}
+
+.brand {
+  margin-left: 25px !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
