@@ -27,9 +27,18 @@ app.configure(function() {
 
 var io = require('socket.io')(server);
 var redis = require('socket.io-redis');
-io.adapter(redis(process.env.REDIS_URL));
 
-var db = require('redis').createClient(process.env.REDIS_URL);
+io.adapter(redis({ host: conf.dbHost, port: conf.dbPort }));
+
+var db = require('redis').createClient();
+
+if (process.env.REDISTOGO_URL) {
+    var rtg = require("url").parse(process.env.REDISTOGO_URL);
+    var db = require('redis').createClient(rtg.port, rtg.hostname);
+    db.auth(rtg.auth.split(":")[1]);
+} else {
+    var db = require("redis").createClient(conf.dbPort, conf.dbHost);
+}
 
 // Logger configuration
 var logger = new events.EventEmitter();
