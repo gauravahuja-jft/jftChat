@@ -27,13 +27,9 @@ app.configure(function() {
 
 var io = require('socket.io')(server);
 var redis = require('socket.io-redis');
-//io.adapter(redis({ host: conf.dbHost, port: conf.dbPort }));     LOCAL
-io.adapter(redis({
-    pubClient: redis.createClient(process.env.REDIS_URL, { return_buffers: true }),
-    subClient: redis.createClient(process.env.REDIS_URL, { return_buffers: true })
-}));       //PROD
+io.adapter(redis(process.env.REDIS_URL));
 
-var db = require('redis').createClient(conf.dbPort,conf.dbHost);
+var db = require('redis').createClient(process.env.REDIS_URL);
 
 // Logger configuration
 var logger = new events.EventEmitter();
